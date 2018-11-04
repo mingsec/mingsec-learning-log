@@ -1,0 +1,48 @@
+{% extends "learning_logs/base.html" %}
+{% load bootstrap3 %}
+
+{% block header %}
+     <h4>
+        科目:
+        <a href="{% url 'learning_logs:entries' topic.name %}">{{ topic }}</a> - 
+        {{ entry }}
+    </h4>
+    
+    <h2>
+        <b>条目:</b>
+    </h2>
+{% endblock header %}
+
+{% block content %}
+    <ul>
+        {% for blog in blogs %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>
+                        <b>{{ blog.title }}</b>
+                        
+                        <a href="{% url 'learning_logs:edit_blog' topic.name entry.name blog.name %}">
+                            <small>编辑条目</small>
+                        </a>
+                    </h4>
+                </div>
+
+                <div class="panel-body">
+                    {{ blog.text|linebreaks }}
+                </div>
+
+                <div class="panel-footer">
+                    <small>创建时间：{{ blog.date_added|date:'Y-m-d H:i' }}</small>
+                    &nbsp&nbsp&nbsp&nbsp&nbsp
+                    <small>最后编辑：{{ blog.date_modify|date:'Y-m-d H:i' }}</small> 时间为创建时间，需修改功能
+                </div>
+            </div><!-- panel -->
+        {% empty %}
+            <b>该主题下尚无任何科目。</b>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'learning_logs:new_blog' topic.name entry.name %}">
+        <small>增加新条目</small>
+    </a>
+{% endblock content %}
