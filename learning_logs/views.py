@@ -4,6 +4,9 @@ from django.urls                    import reverse
 from django.contrib.auth.decorators import login_required
 from .models                        import Topic, Entry, Blog
 from .forms                         import TopicForm, EntryForm, BlogForm
+from xpinyin                        import Pinyin
+
+import datetime
 
 # Create your views here.
 #在此处创建你的视图函数
@@ -39,6 +42,8 @@ def blogs(request,topic_name, entry_name):
 @login_required
 def new_topic(request):
     """创建新的主题"""
+    pinyin = Pinyin()
+
     if request.method != 'POST':
         #当操作为非提交数据时，则创建一个新的表单
         form = TopicForm()
@@ -46,7 +51,9 @@ def new_topic(request):
         #当操作为提交数据时，则对数据进行处理
         form = TopicForm(request.POST)
         if form.is_valid():
-            form.save()
+            new_topic = form.save(commit=False)
+            new_topic.name = pinyin.get_initials(new_topic.text, splitter='')
+            new_topic.save()
             return HttpResponseRedirect(reverse('learning_logs:topics'))
 
     context = {'form':form}
@@ -55,6 +62,8 @@ def new_topic(request):
 @login_required
 def new_entry(request, topic_name):
     """在特定的主题中创建新的科目"""
+    pinyin = Pinyin()
+
     topic = Topic.objects.get(name=topic_name)
 
     if request.method != 'POST':
@@ -66,6 +75,7 @@ def new_entry(request, topic_name):
         if form.is_valid():
             new_entry       = form.save(commit=False)
             new_entry.topic = topic
+            new_entry.name = pinyin.get_initials(new_entry.text, splitter='')
             new_entry.save()
             return HttpResponseRedirect(reverse('learning_logs:entries', args=[topic_name]))
 
@@ -75,6 +85,8 @@ def new_entry(request, topic_name):
 @login_required
 def new_blog(request, topic_name, entry_name):
     """在特定主题中的某个科目下创建新的条目"""
+    pinyin = Pinyin()
+
     topic = Topic.objects.get(name=topic_name)
     entry = Entry.objects.get(name=entry_name)
 
@@ -88,6 +100,7 @@ def new_blog(request, topic_name, entry_name):
             new_blog       = form.save(commit=False)
             new_blog.entry = entry
             new_blog.owner = request.user
+            new_blog.name  = pinyin.get_initials(new_blog.title, splitter='')
             new_blog.save()
             return HttpResponseRedirect(reverse('learning_logs:blogs', args=[topic_name, entry_name]))
 
@@ -111,7 +124,9 @@ def edit_blog(request, topic_name, entry_name, blog_name):
         #当操作为提交数据时，则对数据进行处理
         form = BlogForm(instance=blog, data=request.POST)
         if form.is_valid():
-            form.save()
+            edit_blog             = form.save(commit=False)
+            edit_blog.date_modify = datetime.datetime.now()
+            edit_blog.save()
             return HttpResponseRedirect(reverse('learning_logs:blogs', args=[topic.name, entry.name]))
 
     context = {'topic':topic,'entry':entry, 'blog':blog,'form':form}
