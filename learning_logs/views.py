@@ -25,7 +25,7 @@ def topics(request):
 def entries(request, topic_name):
     """显示单个主题及其所有的科目"""
     topic   = Topic.objects.get(name=topic_name)
-    entries = topic.entry_set.order_by('-date_added')
+    entries = topic.entry_set.order_by('date_added')
     context = {'topic':topic,'entries':entries}
 
     return render(request, 'learning_logs/entries.html', context)
@@ -51,12 +51,13 @@ def new_topic(request):
         #当操作为提交数据时，则对数据进行处理
         form = TopicForm(request.POST)
         if form.is_valid():
-            new_topic = form.save(commit=False)
+            new_topic      = form.save(commit=False)
             new_topic.name = pinyin.get_initials(new_topic.text, splitter='')
             new_topic.save()
             return HttpResponseRedirect(reverse('learning_logs:topics'))
 
     context = {'form':form}
+
     return render(request, 'learning_logs/new_topic.html', context)
 
 @login_required
@@ -75,11 +76,12 @@ def new_entry(request, topic_name):
         if form.is_valid():
             new_entry       = form.save(commit=False)
             new_entry.topic = topic
-            new_entry.name = pinyin.get_initials(new_entry.text, splitter='')
+            new_entry.name  = pinyin.get_initials(new_entry.text, splitter='')
             new_entry.save()
-            return HttpResponseRedirect(reverse('learning_logs:entries', args=[topic_name]))
+            return HttpResponseRedirect(reverse('learning_logs:entries', args=[topic.name]))
 
     context = {'topic':topic, 'form':form}
+
     return render(request, 'learning_logs/new_entry.html', context)
 
 @login_required
@@ -105,6 +107,7 @@ def new_blog(request, topic_name, entry_name):
             return HttpResponseRedirect(reverse('learning_logs:blogs', args=[topic_name, entry_name]))
 
     context = {'topic':topic,'entry':entry, 'form':form}
+
     return render(request, 'learning_logs/new_blog.html', context)
 
 @login_required
@@ -130,4 +133,29 @@ def edit_blog(request, topic_name, entry_name, blog_name):
             return HttpResponseRedirect(reverse('learning_logs:blogs', args=[topic.name, entry.name]))
 
     context = {'topic':topic,'entry':entry, 'blog':blog,'form':form}
+
     return render(request, 'learning_logs/edit_blog.html', context)
+
+@login_required
+def my_blogs(request):
+    """显示当前用户创建的所有条目"""
+    blogs = Blog.objects.filter(owner=request.user)
+
+    entries = []
+    topics  = []
+
+    test_all = []
+    
+    for blog in blogs:
+        test     = []
+
+        entry = blog.entry
+        topic = entry.topic
+
+        test = [blog, entry, topic ]
+        test_all.append(test)
+
+    context = {'test_all':test_all}
+
+    return render(request, 'learning_logs/my_blogs.html', context)
+

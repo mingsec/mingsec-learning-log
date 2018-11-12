@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'bootstrap3',
 
     #注册自己的应用程序
+    'homepage',
     'learning_logs',
     'users',
 ]

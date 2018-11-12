@@ -2,47 +2,44 @@
 {% load bootstrap3 %}
 
 {% block header %}
-     <h4>
+    <h3>
+        <b>条目:</b>
+    </h3>
+    <small>
         科目:
         <a href="{% url 'learning_logs:entries' topic.name %}">{{ topic }}</a> - 
         {{ entry }}
-    </h4>
-    
-    <h2>
-        <b>条目:</b>
-    </h2>
+        &nbsp&nbsp&nbsp&nbsp&nbsp
+        <a href="{% url 'learning_logs:new_blog' topic.name entry.name %}">增加新条目</a>
+    </small>
 {% endblock header %}
 
 {% block content %}
-    <ul>
-        {% for blog in blogs %}
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4>
-                        <b>{{ blog.title }}</b>
-                        
-                        <a href="{% url 'learning_logs:edit_blog' topic.name entry.name blog.name %}">
-                            <small>编辑条目</small>
-                        </a>
-                    </h4>
-                </div>
+    {% for blog in blogs %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>
+                    <b>{{ blog.title|linebreaks }}</b>              
+                </h4>
+            </div>
 
-                <div class="panel-body">
-                    {{ blog.text|linebreaks }}
-                </div>
+            <div class="panel-body">
+                {{ blog.text|linebreaks }}
+            </div>
 
-                <div class="panel-footer">
-                    <small>创建时间：{{ blog.date_added|date:'Y-m-d H:i' }}</small>
+            <div class="panel-footer">
+                <small>
+                    创建人：{{ blog.owner }}
                     &nbsp&nbsp&nbsp&nbsp&nbsp
-                    <small>最后编辑：{{ blog.date_modify|date:'Y-m-d H:i' }}</small>
-                </div>
-            </div><!-- panel -->
-        {% empty %}
-            <b>该主题下尚无任何条目。</b>
-        {% endfor %}
-    </ul>
-
-    <a href="{% url 'learning_logs:new_blog' topic.name entry.name %}">
-        <small>增加新条目</small>
-    </a>
+                    创建时间：{{ blog.date_added|date:'Y-m-d H:i' }}
+                    &nbsp&nbsp&nbsp&nbsp&nbsp                    
+                    最后编辑：{{ blog.date_modify|date:'Y-m-d H:i' }}
+                    &nbsp&nbsp&nbsp&nbsp&nbsp  
+                    <a href="{% url 'learning_logs:edit_blog' topic.name entry.name blog.name %}">编辑条目</a>
+                </small>
+            </div>
+        </div><!-- panel -->
+    {% empty %}
+        <b>该主题下尚无任何条目。</b>
+    {% endfor %}
 {% endblock content %}
